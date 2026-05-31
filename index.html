@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+
+<meta charset="UTF-8">
+<title>SGM Finance</title>
+
+<style>
+@media (max-width: 768px){
+  body{flex-direction: column;height:auto;}
+  .navbar-box{flex-direction: column;gap:10px;}
+  .navbar-box div{display:flex ;flex-wrap:wrap; justify-content:center; gap:8px;}
+  .navbar button{flex: 1 1 140px; max-width: 180px;}
+  .main{padding:10px;}
+  .card{margin-bottom:10px;}
+  input{width:100%;margin-bottom:10px;}
+}
+
+body{
+  display:flex;
+  flex-direction:column;
+  margin:0;
+  height:100vh;
+  font-family:Arial, Helvetica, sans-serif;
+  background-color: #f0f0f0;
+}
+
+.main{
+  flex:1;
+  padding:30px;
+  max-width:1000px;
+  margin:0 auto;
+  width:100%;
+}
+
+.navbar{
+  width:100%;
+  background-color:green;
+  color:white;
+  padding:15px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:sticky;
+  top:0;
+}
+
+.navbar-box{
+  width:90%;
+  max-width:1100px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+
+.navbar-box div{
+  display:flex;
+  justify-content:center;
+  flex:1;
+  gap:10px;
+}
+
+.navbar button{
+  padding:10px 15px;
+  border-radius:8px;
+  border:none;
+  background-color:rgba(255,255,255,0.15);
+  color:white;
+  cursor:pointer;
+  font-size:14px;
+}
+
+.navbar button:hover{
+  background-color:rgba(255,255,255,0.25);
+  transform:translateY(-2px);
+}
+
+.bar-container{
+  width:100%;
+  height:20px;
+  background:#ddd;
+  border-radius:10px;
+  margin-bottom:10px;
+  overflow:hidden;
+}
+
+.bar{
+  height:100%;
+  width:0%;
+  transition:width 0.5s ease;
+}
+
+.ingresos-bar{
+  background:#0b6623;
+}
+
+.gastos-bar{
+  background:#d32f2f;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(300px,1fr));
+  gap:20px;
+}
+
+.card{
+  background:white;
+  padding:20px;
+  border-radius:12px;
+  margin-bottom:15px;
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+#dashboard{
+  background:linear-gradient(135deg,#0b6623,#1e8e3e);
+  color:white;
+  padding:30px;
+  border-radius:16px;
+}
+
+*{
+  transition:all 0.3s ease;
+}
+
+@keyframes fade{
+  from{opacity:0;transform:translateY(10px);}
+  to{opacity:1;transform:translateY(0);}
+}
+
+footer{
+  background:green;
+  color:white;
+  text-align:center;
+  padding:15px;
+  font-size:14px;
+  margin-top:20px;
+}
+</style>
+
+</head>
+
+<body class="claro">
+
+<div class="navbar">
+  <div class="navbar-box">
+
+    <h2>SGM</h2>
+
+    <div>
+      <button onclick="mostrar('dashboard')">dashboard</button>
+      <button onclick="mostrar('ingresos')">ingresos</button>
+      <button onclick="mostrar('gastos')">Gastos</button>
+      <button onclick="mostrar('config')">Configuracion</button>
+      <button onclick="mostrar('info')">info</button>
+      <button onclick="resetear()">Resetear Datos</button>
+      <button onclick="mostrar('historial')">historial</button>
+    </div>
+
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- INGRESOS -->
+  <div id="vista-ingresos" style="display:none;">
+    <div class="card">
+      <h2>Ingresos</h2>
+
+      <input type="number" id="ingresoInput">
+
+      <button onclick="agregarIngreso()">
+        Agregar Ingreso
+      </button>
+    </div>
+  </div>
+
+  <!-- GASTOS -->
+  <div id="vista-gastos" style="display:none;">
+    <div class="card">
+      <h2>Gastos</h2>
+
+      <input type="number" id="gastoInput">
+
+      <button onclick="agregarGasto()">
+        Agregar Gasto
+      </button>
+    </div>
+  </div>
+
+  <!-- CONFIG -->
+  <div id="vista-config" style="display:none;">
+    <div class="card">
+      <h2>Configuracion</h2>
+
+      <button onclick="cambiarTema('claro')">
+        Modo Claro
+      </button>
+
+      <button onclick="cambiarTema('oscuro')">
+        Modo Oscuro
+      </button>
+    </div>
+  </div>
+  <div id="vista-info" style="display: none;">
+    <div class="card">
+      <h2>Informacion</h2>
+      <p>Esta app esta pensada para l agente compradora compulsiva y gente con salario justo</p>
+      <p>version actual : beta 2</p>
+      <p>En futuras versiones se agregaran nuevas funciones</p>
+    </div>
+  </div>
+  <div id="vista-historial" style = "display:none;">
+    <div class="card">
+      <h2>historial</h2>
+      <ul id="listaHistorial"></ul>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="vista-dashboard">
+
+    <div class="grid">
+
+      <div class="card" id="resumenIngresos">
+        <h2>Total Ingresos</h2>
+        <h3 id="totalIngresos">$0</h3>
+      </div>
+
+      <div class="card" id="resumenGastos">
+        <h2>Total Gastos</h2>
+        <h3 id="totalGastos">$0</h3>
+      </div>
+
+      <div class="card">
+        <h2>Comparacion Visual</h2>
+
+        <p>Ingresos</p>
+
+        <div class="bar-container">
+          <div class="bar ingresos-bar" id="barraIngresos"></div>
+        </div>
+
+        <p>Gastos</p>
+
+        <div class="bar-container">
+          <div class="bar gastos-bar" id="barraGastos"></div>
+        </div>
+      </div>
+
+      <div id="dashboard" class="card">
+        <h2>Balance</h2>
+        <h3 id="balance">$0</h3>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
+
+<footer>
+  <p>SGM Finance</p>
+  <p>Derechos reservados</p>
+  <p>version beta 2</p>
+</footer>
+
+<script>
+
+let ingresos = 0;
+let gastos = 0;
+let historial = [];
+
+window.onload = function(){
+
+  ingresos = Number(localStorage.getItem("ingresos")) || 0;
+  gastos = Number(localStorage.getItem("gastos")) || 0;
+
+  document.getElementById("vista-dashboard").style.display = "block";
+
+  actualizarBalance();
+};
+
+function resetear(){
+
+  ingresos = 0;
+  gastos = 0;
+
+  localStorage.setItem("ingresos", 0);
+  localStorage.setItem("gastos",0);
+
+  actualizarBalance();
+}
+
+function mostrar(section){
+
+  document.getElementById("vista-dashboard").style.display = "none";
+  document.getElementById("vista-ingresos").style.display = "none";
+  document.getElementById("vista-gastos").style.display = "none";
+  document.getElementById("vista-config").style.display = "none";
+  document.getElementById("vista-info").style.display = "none";
+  document.getElementById("vista-historial").style.display ="none";
+
+  if(section === "dashboard"){
+    document.getElementById("vista-dashboard").style.display = "block";
+  }
+
+  if(section === "ingresos"){
+    document.getElementById("vista-ingresos").style.display = "block";
+  }
+
+  if(section === "gastos"){
+    document.getElementById("vista-gastos").style.display = "block";
+  }
+
+  if(section === "config"){
+    document.getElementById("vista-config").style.display = "block";
+  }
+  if(section === "info"){
+    document.getElementById("vista-info").style.display = "block";
+  }
+  if(section === "historial"){
+    document.getElementById("vista-historial").style.display = "block";
+  }
+}
+
+function agregarIngreso(){
+  let input = document.getElementById("ingresoInput");
+
+  let valor = Number(input.value);
+    
+  historial.push({tipo:"ingreso",monto:valor});
+
+  if(valor <= 0 || isNaN(valor)) return;
+
+  ingresos += valor;
+
+  localStorage.setItem("ingresos", ingresos);
+
+  input.value = "";
+
+  actualizarBalance();
+  actualizarHistorial();
+}
+
+function agregarGasto(){
+  
+  let input = document.getElementById("gastoInput");
+
+  let valor = Number(input.value);
+
+  historial.push({tipo: "gasto", monto : valor});
+
+  if(valor <= 0 || isNaN(valor)) return;
+
+  gastos += valor;
+
+  localStorage.setItem("gastos", gastos);
+
+  input.value = "";
+
+  actualizarBalance();
+  actualizarHistorial();
+}
+
+function actualizarBalance(){
+
+  let balance = ingresos - gastos;
+
+  document.getElementById("balance").innerText = "$" + balance;
+
+  document.getElementById("totalIngresos").innerText = "$" + ingresos;
+
+  document.getElementById("totalGastos").innerText = "$" + gastos;
+
+  let total = ingresos + gastos;
+
+  document.getElementById("barraIngresos").style.width =
+    (total === 0 ? 0 : (ingresos / total) * 100) + "%";
+
+  document.getElementById("barraGastos").style.width =
+    (total === 0 ? 0 : (gastos / total) * 100) + "%";
+}
+
+function cambiarTema(modo){
+
+  document.body.className = modo;
+
+  if(modo === "oscuro"){
+    document.body.style.backgroundColor = "#121212";
+
+    document.querySelector(".navbar").style.backgroundColor = "#0d47a1";
+
+    document.querySelectorAll(".card").forEach(c => {
+
+      c.style.backgroundColor = "#1e1e1e";
+
+      c.style.color = "white";
+    });
+
+    document.querySelector("footer").style.backgroundColor = "#0d47a1";
+  }
+
+  if(modo === "claro"){
+    document.body.style.backgroundColor = "#f0f0f0"
+
+    document.querySelector(".navbar").style.backgroundColor = "green";
+
+    document.querySelectorAll(".card").forEach(c => {
+
+      c.style.backgroundColor = "white";
+
+      c.style.color = "black";
+    });
+
+    document.querySelector("footer").style.backgroundColor = "green";
+
+    document.getElementById("dashboard").style.background =
+      "linear-gradient(135deg,#0b6623,#1e8e3e)";
+
+    document.getElementById("dashboard").style.color = "white";
+  }
+ 
+}
+ function actualizarHistorial(){
+    let lista = document.getElementById("listaHistorial");
+    lista.innerHTML = "";
+    for(let item of historial){
+      let li = document.createElement("li");
+      if(item.tipo === "ingreso"){
+        li.innerText = "+ $" + item.monto;
+        li.style.color ="green";
+      }
+      if(item.tipo === "gasto"){
+        li.innerText = "- $" + item.monto;
+        li.style.color = "red";
+      }
+      lista.appendChild(li);
+    }
+  }
+
+</script>
+
+</body>
+</html>
